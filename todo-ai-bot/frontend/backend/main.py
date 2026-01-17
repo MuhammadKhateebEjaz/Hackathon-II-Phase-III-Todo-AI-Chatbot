@@ -10,6 +10,19 @@ app.include_router(tasks.router, prefix="/api/tasks", tags=["Tasks"])
 def root():
     return {"message": "Phase III Todo AI Chatbot Backend is running 🚀"}
 
-
+{
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "backend/main.py" 
+    }
+  ],
+  "builds": [
+    {
+      "src": "backend/main.py",
+      "use": "@vercel/python"
+    }
+  ]
+}
 
 
