@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Physical AI Book Assistant</title>
+<style>
+    #chatbot-button:hover {
+    transform: scale(1.1);
+    transition: 0.2s;
+}
+
+  #chatbot-wrapper { position: fixed; bottom: 20px; right: 20px; z-index: 9999; font-family: Arial, sans-serif; }
+  #chatbot-button { width: 60px; height: 60px; border-radius: 50%; background: #007bff; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); font-size: 24px; }
+  #chatbot-window { display: none; flex-direction: column; width: 360px; max-width: 90vw; height: 480px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); overflow: hidden; background: white; margin-bottom: 10px; }
+  #chatbot-header { background: #007bff; color: white; padding: 10px; font-weight: bold; cursor: pointer; }
+  #chatbox { flex: 1; padding: 10px; display: flex; flex-direction: column; overflow-y: auto; background: #f9f9f9; }
+  .message { margin: 5px 0; padding: 8px 12px; border-radius: 10px; max-width: 80%; }
+  .user { background: #007bff; color: white; align-self: flex-end; }
+  .bot { background: #e0e0e0; color: black; align-self: flex-start; }
+  #input-area { display: flex; border-top: 1px solid #ddd; }
+  #userinput { flex: 1; border: none; padding: 10px; outline: none; }
+  #sendbtn { background: #007bff; color: white; border: none; padding: 10px; cursor: pointer; }
+  .typing { display: inline-block; width: 8px; height: 8px; margin: 0 2px; background: #333; border-radius: 50%; animation: blink 1.4s infinite both; }
+  .typing:nth-child(1) { animation-delay: 0s; }
+  .typing:nth-child(2) { animation-delay: 0.2s; }
+  .typing:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes blink { 0%, 80%, 100% { opacity: 0; } 40% { opacity: 1; } }
+</style>
+</head>
+<body>
+
+<div id="chatbot-wrapper">
+ <div id="chatbot-button">
+  <img src="/img/chat-to-chat.jpg" alt="Chat" style="width: 100%; height: 100%; border-radius: 50%;">
+</div>
+
+  <div id="chatbot-window">
+    <div id="chatbot-header">📚 Physical AI Book Assistant</div>
+    <div id="chatbox"></div>
+    <div id="input-area">
+      <input id="userinput" type="text" placeholder="Ask anything about the book...">
+      <button id="sendbtn">Send</button>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+<script>
+const chatbotButton = document.getElementById('chatbot-button');
+const chatbotWindow = document.getElementById('chatbot-window');
+const chatbotHeader = document.getElementById('chatbot-header');
+const chatBox = document.getElementById('chatbox');
+const userInput = document.getElementById('userinput');
+const sendBtn = document.getElementById('sendbtn');
+
+// Toggle window
+chatbotButton.addEventListener('click', () => { chatbotWindow.style.display='flex'; chatbotButton.style.display='none'; });
+chatbotHeader.addEventListener('click', () => { chatbotWindow.style.display='none'; chatbotButton.style.display='flex'; });
+
+// Book chapters with keywords & full text
+const bookChapters = [
+  { keywords:["chapter 1","intro","introduction","physical ai"], text:"Chapter 1: Introduction to Physical AI\n\nPhysical AI refers to artificial intelligence systems embedded in physical bodies such as robots. Example: A humanoid robot walking and balancing. Summary: Physical AI connects intelligence with physical action." },
+  { keywords:["chapter 2","humanoid robotics"], text:"Chapter 2: Overview of Humanoid Robotics\n\nHumanoid robots resemble human body structure and movement. Core concepts: Degrees of freedom, human-like joints, balance and locomotion. Use case: Service robots in healthcare. Summary: Humanoids mimic human form and behavior." },
+  { keywords:["chapter 3","sensors","actuators"], text:"Chapter 3: Sensors and Actuators\n\nSensors collect environmental data, actuators perform actions. Core concepts: Cameras, LiDAR, IMU, motors, servos. Example: Robot detects object with camera and grasps it. Summary: Bridge between AI and physical world." },
+  { keywords:["chapter 4","kinematics","motion"], text:"Chapter 4: Kinematics and Motion Basics\n\nKinematics studies motion without forces. Core concepts: Forward kinematics, inverse kinematics. Example: Calculating angles for a robot arm. Summary: Essential for motion planning." },
+  { keywords:["chapter 5","ros 2"], text:"Chapter 5: Introduction to ROS 2\n\nROS 2 is a middleware for building scalable robotic applications. Core concepts: Nodes, DDS. Example: Robot runs multiple nodes for navigation, perception, control. Summary: Simplifies software development." },
+  { keywords:["chapter 6","nodes","topics","services"], text:"Chapter 6: ROS 2 Nodes, Topics, and Services\n\nNodes communicate via topics, services, and actions. Core concepts: Publisher/Subscriber, Services, Actions. Example: Navigation node publishes location. Summary: Modular, reliable communication." },
+  { keywords:["chapter 7","gazebo","simulation"], text:"Chapter 7: Simulation with Gazebo\n\nGazebo is a 3D simulation for testing robots without hardware. Core concepts: Physics engines, robot models. Example: Robot navigating warehouse. Summary: Reduces hardware risks." },
+  { keywords:["chapter 8","unity","simulation"], text:"Chapter 8: Unity for Robotics Simulation\n\nUnity provides high-quality 3D simulation. Core concepts: Digital twins, visual simulation. Example: Humanoid robot in virtual office. Summary: Enhances realism and training." },
+  { keywords:["chapter 9","ai","perception","learning"], text:"Chapter 9: AI for Perception and Learning\n\nAI enables perception, decision-making, and learning. Core concepts: Computer vision, reinforcement learning. Example: Robot learning to pick objects. Summary: Improves autonomy and learning." },
+  { keywords:["chapter 10","future","physical ai","humanoid robots"], text:"Chapter 10: Future of Physical AI & Humanoid Robots\n\nFuture trends: Ethical AI, human-robot collaboration, advanced perception. Example: Robots assisting humans in healthcare, education, manufacturing. Summary: Smarter, safer, interactive systems." }
+];
+
+// Append chat messages
+function appendMessage(sender,text){
+    const msg=document.createElement('div');
+    msg.classList.add('message',sender);
+    msg.textContent=text;
+    chatBox.appendChild(msg);
+    chatBox.scrollTop=chatBox.scrollHeight;
+}
+
+// Typing animation
+function appendTyping(){
+    const typingDiv=document.createElement('div');
+    typingDiv.classList.add('bot','typing-message');
+    typingDiv.innerHTML='<span class="typing"></span><span class="typing"></span><span class="typing"></span>';
+    chatBox.appendChild(typingDiv);
+    chatBox.scrollTop=chatBox.scrollHeight;
+    return typingDiv;
+}
+
+// Natural-language match (simple scoring)
+function getBookAnswer(input){
+    input=input.toLowerCase();
+    let bestMatch=null;
+    let maxScore=0;
+
+    for(let chapter of bookChapters){
+        let score=0;
+        for(let kw of chapter.keywords){
+            if(input.includes(kw)) score+=2; // exact keyword
+            else{
+                const words=kw.split(' ');
+                for(let w of words){
+                    if(input.includes(w)) score+=1; // partial match
+                }
+            }
+        }
+        if(score>maxScore){ maxScore=score; bestMatch=chapter.text; }
+    }
+
+    if(maxScore>0) return bestMatch;
+    return "Sorry, I only answer questions from 'Fundamentals of Physical AI & Humanoid Robotics: A Beginner's Guide'. Try asking about a chapter, sensors, ROS 2, or AI.";
+}
+
+// Send message
+function sendMessage(){
+    const input=userInput.value.trim();
+    if(!input) return;
+    appendMessage('user',input);
+
+    const typingDiv=appendTyping();
+    setTimeout(()=>{
+        typingDiv.remove();
+        const reply=getBookAnswer(input);
+        appendMessage('bot',reply);
+    },800);
+
+    userInput.value='';
+}
+
+sendBtn.addEventListener('click',sendMessage);
+userInput.addEventListener('keypress',(e)=>{ if(e.key==='Enter') sendMessage(); });
+</script>
+</body>
+</html>

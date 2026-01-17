@@ -1,0 +1,4 @@
+services:
+  - type: web
+    name: todo-fastapi
+    env: docker

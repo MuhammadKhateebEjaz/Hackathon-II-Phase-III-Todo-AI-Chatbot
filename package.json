@@ -1,0 +1,16 @@
+{
+  "name": "Phase II Todo Full Stack Web Application",
+  "version": "1.0.0",
+  "description": "Phase II Full Stack Todo App",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"npm:dev-frontend\" \"npm:dev-backend\"",
+    "dev-frontend": "cd frontend && npm install && npm run dev",
+    "dev-backend": "cd backend && python main.py"
+  },
+  "author": "Muhammad Khateeb Ejaz",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
