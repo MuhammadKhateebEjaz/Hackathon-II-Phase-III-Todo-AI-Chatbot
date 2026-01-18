@@ -12,5 +12,13 @@
   "license": "ISC",
   "devDependencies": {
     "concurrently": "^9.2.1"
+
+
+    "scripts": {
+  "dev": "next dev",
+  "build": "next build",
+  "start": "next start"
+}
+
   }
 }
